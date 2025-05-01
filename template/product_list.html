@@ -1,0 +1,71 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'static.css' %}">
+    <title>Products in {{ subcategory.name }}</title>
+</head>
+<body>
+    <header>
+        <h2>Products in {{ subcategory.name }}</h2>
+    </header>
+
+    {% if user.profile.is_vendor %}
+        <a href="/create-product/{{ subcategory.id }}" class="create-product-btn">Create Product</a>
+    {% endif %}
+    
+    {% if products %}
+        <div class="product-list">
+            {% for product in page_obj %}
+                <div class="product-item">
+                    <a href="/product_detail/{{ product.id }}" class="product-item-link">
+                        <h2 class="product-name">{{ product.product_name }}</h2>
+                        <p class="product-price">${{ product.product_price }}</p>
+
+                        {% if product.images.all %}
+                            <div class="product-image">
+                                <img src="{{ product.images.first.image.url }}" alt="{{ product.product_name }}">
+                            </div>
+                        {% else %}
+                            <p>No images available.</p>
+                        {% endif %}
+                    </a>
+                    <div class="product-actions">
+                        {% if user.profile.is_vendor %}
+                            <a href="/edit-product/{{ product.id }}" class="edit-button">Edit</a>
+                            <a href="/delete_product/{{ product.id }}" class="edit-button">Delete Product</a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; First</a>
+                <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <a href="?page={{ num }}" class="current-page">{{ num }}</a>
+                {% else %}
+                    <a href="?page={{ num }}">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+            {% endif %}
+        </div>
+
+    {% else %}
+        <p>No products found in this subcategory.</p>
+    {% endif %}
+
+</body>
+</html>

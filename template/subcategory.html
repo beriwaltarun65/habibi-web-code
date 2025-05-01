@@ -1,0 +1,59 @@
+
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'static.css' %}">
+    <title>Subcategories of {{ category.name }}</title>
+</head>
+<body>
+    <header>
+        <h2>Subcategories of {{ category.name }}</h2>
+    </header>
+
+    <div class="subcategory-list">
+
+        <div class="create-button">
+            {% if user.profile.is_vendor %}
+                <a href="/create_subcategory/{{ category.id }}">Create Subcategory</a>
+               
+              
+            {% endif %}    
+        </div>
+
+        {% for subcategory in subcategories %}
+            <div class="subcategory">
+               
+                <a href="/products_list_page/{{ subcategory.id }}">{{ subcategory.name }}</a>
+
+                <div class="sub-image">
+
+
+                    {% if subcategory.image %}
+    
+                        <img src="{{ subcategory.image.url }}" alt="{{ subcategory.name }}" style="max-width: 100px; height: auto;">
+                        
+                        
+                        
+                    {% else %}
+                        <p>No image available</p>
+                    {% endif %}
+                </div>
+                {% if user.profile.is_vendor %}
+                   <a href="/edit_sub_cat/{{ subcategory.id }}">Edit Category</a>
+                {% endif %}   
+               
+            </div>
+            
+
+
+        {% empty %}
+            <p>No subcategories available for this category.</p>
+        {% endfor %}
+    </div>
+
+</body>
+</html>

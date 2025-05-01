@@ -1,0 +1,47 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ category.name }} Details</title>
+    <link rel="stylesheet" href="{% static 'static.css' %}"> 
+</head>
+<body>
+
+    <header>
+        <h1>Category: {{ category.name }}</h1>
+    </header>
+
+    <section>
+       
+        {% if category.image %}
+            <img src="{{ category.image.url }}" alt="{{ category.name }} image" width="300">
+        {% else %}
+            <p>No image available for this category.</p>
+        {% endif %}
+        
+        <p>Category ID: {{ category.id }}</p>
+
+       
+        <h3>Products in this category:</h3>
+        <ul>
+            {% for product in category.product_set.all %}  
+                <li>{{ product.name }} - {{ product.price }} </li>
+            {% empty %}
+                <p>No products available in this category.</p>
+            {% endfor %}
+        </ul>
+
+       
+        {% if user.is_authenticated %}
+            <p>Welcome, {{ user.username }}!</p>
+            <a href="{% url 'userlogout' %}">Logout</a>
+        {% else %}
+            <a href="{% url 'userlogin' %}">Login</a>
+        {% endif %}
+    </section>
+
+</body>
+</html>

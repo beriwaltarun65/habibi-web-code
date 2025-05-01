@@ -1,0 +1,145 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order History</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            padding-top: 50px;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #343a40;
+            margin-bottom: 20px;
+        }
+
+        .order-summary {
+            margin-top: 20px;
+            padding-top: 10px;
+        }
+
+        .order-summary table {
+            width: 100%;
+        }
+
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .pagination {
+            margin-top: 20px;
+        }
+
+        .pagination .btn {
+            margin: 0 5px;
+        }
+
+        .pagination .disabled {
+            cursor: not-allowed;
+            background-color: #ddd;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Your Order History</h2>
+
+        {% if page_obj %}
+            <div class="order-summary">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Image</th>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Total Price</th>
+                            <th>Status</th>
+                            <th>Delivery Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in page_obj %}
+                            <tr>
+                                <td>{{ order.id }}</td>
+                                <td>
+                                    {% if order.product.images.first %}
+                                        <img src="{{ order.product.images.first.image.url }}" alt="{{ order.product.product_name }}" style="max-width: 100px; height: auto;">
+                                    {% else %}
+                                        <span>No Image Available</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ order.product.product_name }}</td>
+                                <td>{{ order.quantity }}</td>
+                                <td>${{ order.total_price }}</td>
+                                <td class="status-{{ order.status }}">{{ order.status }}</td>
+                                <td>{{ order.delivery_date|date:"F j, Y" }}</td>
+                                <td>
+                                    {% if order.status != 'cancelled' %}
+                                    <form action="{% url 'cancel_order' order.id %}" method="POST">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger">Cancel Order</button>
+                                    </form>
+                                    {% else %}
+                                    <span>Order Already Canceled</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center">No orders found.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination">
+                <span class="btn {% if not page_obj.has_previous %}disabled{% endif %}">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}" class="text-white">Previous</a>
+                    {% else %}
+                        Previous
+                    {% endif %}
+                </span>
+
+                <span class="btn {% if not page_obj.has_next %}disabled{% endif %}">
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="text-white">Next</a>
+                    {% else %}
+                        Next
+                    {% endif %}
+                </span>
+            </div>
+
+        {% else %}
+            <p>You don't have any orders yet.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

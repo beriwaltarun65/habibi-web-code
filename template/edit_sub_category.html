@@ -1,0 +1,43 @@
+
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Subcategory</title>
+
+    <link rel="stylesheet" href="{% static 'static.css' %}">
+</head>    
+<body>
+    <header>
+        <h1>Edit Subcategory: '{{ subcategory.name }}'</h1>
+    </header>
+
+    <div class="container">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <label for="name">Subcategory Name</label>
+            <input type="text" name="name" value="{{ subcategory.name }}" required><br><br>
+
+
+            <label for="image">Upload New Image (Optional)</label>
+            <input type="file" name="image"><br><br>
+
+            {% if subcategory.image %}
+                <h3>Current Image:</h3>
+                <img src="{{ subcategory.image.url }}" alt="{{ subcategory.name }}" class="category_image" style="max-width: 200px;">
+                <br>
+                <label for="delete_image">Delete Current Image</label>
+                <input type="checkbox" name="delete_image" value="1">
+            {% else %}
+                <p>No image available</p>
+            {% endif %}
+
+            <button type="submit">Save Changes</button>
+        </form>
+    </div>
+</body>
+</html> 

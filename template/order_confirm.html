@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Order Confirmation</h2>
+
+        <div class="order-details">
+            <h4>Order #{{ order.id }} - Confirmed</h4>
+
+            <p><strong>Thank you for your purchase, {{ order.user.get_full_name }}!</strong></p>
+            <p>Your order has been successfully placed. Below are the details:</p>
+
+            <div class="order-summary">
+                <h4>Order Summary:</h4>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <img src="{{ order.product.images.first.image.url }}" alt="{{ order.product.product_name }}" class="product-img">
+                                {{ order.product.product_name }}
+                            </td>
+                            <td>{{ order.quantity }}</td>
+                            <td>${{ order.price }}</td>
+                            <td>${{ total_price }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p><strong>Total Amount: ${{ total_price }}</strong></p>
+
+                <h5>Delivery Address:</h5>
+                <p>{{ order.shipping_address }}</p>
+
+                <h5>Payment Method:</h5>
+                <p>{{ order.payment_method }}</p>
+
+                <h5>Expected Delivery Date:</h5>
+                <p>{{ order.delivery_date }}</p>
+
+                <div class="order-details">
+                    <p>Order ID: {{ order.id }}</p>
+                    <p>Delivery Date: {{ order.delivery_date }}</p>
+                
+                    {% if is_delivered %}
+                        <p>Status: Delivered</p>
+                    {% else %}
+                        <p>Status: Pending Delivery</p>
+                    {% endif %}
+                </div>
+                
+            </div>
+
+            <a href="/" class="btn">Back to Homepage</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,46 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'static.css' %}">
+    <title>User Profile</title>
+
+</head>
+<body>
+    
+
+    <div class="main-container">
+      
+        <header>
+            <!-- <h1>Welcome to Your Profile</h1> -->
+            <p>Manage your personal information and orders</p>
+        </header>
+
+       
+        <div class="profile-overview">
+         
+            <div class="profile-card">
+                <h2>{{ user.first_name }} {{ user.last_name }}</h2>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Phone:</strong> {{ user.profile.phone_no }}</p>
+                {% if is_vendor %}
+                    <div class="vendor-status yes">Vendor Status: yes</div>
+                {% else %}
+                    <div class="vendor-status no">Vendor Status: no</div>
+                {% endif %}
+                <button class="edit-button" onclick="window.location.href='/update-profile'">Edit Profile</button>
+            </div>
+
+           
+            <div class="order-history-card">
+                <h3>Your Orders</h3>
+                <p>View your previous purchases and order details.</p>
+                <a href="/history/">View Order History</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

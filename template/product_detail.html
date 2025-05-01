@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.product_name }} - Product Detail</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+    <style>
+       * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 50px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        header {
+            background-color: #fff;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            color: #333;
+            font-weight: 700;
+        }
+
+        .product-detail {
+            display: flex;
+            align-items: flex-start;
+            padding: 40px;
+        }
+
+        .product-images {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 25%;
+            justify-content: flex-start;
+        }
+
+        .small_size {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .thumbnail:hover {
+            opacity: 0.7;
+        }
+
+        .main-image {
+            width: 400px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .product-info-container {
+            width: 70%;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .product-specs p {
+            font-size: 1.1em;
+            color: #555;
+            margin: 10px 0;
+        }
+
+        .product-price {
+            font-size: 2em;
+            color: #e74c3c;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .product-description {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #666;
+        }
+
+        .product-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .add-to-cart-button, .buy-now-button {
+            background-color: #02080b;
+            color: white;
+            padding: 15px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+            text-align: center;
+        }
+
+        .add-to-cart-button:hover, .buy-now-button:hover {
+            background-color: #02080c;
+        }
+
+        .stock {
+            background-color: #f2dede;
+            color: #a94442;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ebccd1;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .reviews-section {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #fafafa;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .reviews-section h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .product-rating {
+            display: flex;
+            align-items: center;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        .average-rating {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-right: 10px;
+        }
+
+        .stars {
+            display: inline-flex;
+        }
+
+        .stars i {
+            color: #f39c12;
+            margin-right: 5px;
+        }
+
+        .review-item {
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            margin-bottom: 15px;
+        }
+
+        .review-item p {
+            margin-bottom: 10px;
+            color: #666;
+        }
+
+        .review-item .rating {
+            font-weight: bold;
+            color: #f39c12;
+        }
+
+        .review-item .username {
+            font-weight: bold;
+        }
+
+        .review-item a {
+            color: #3498db;
+            margin-right: 10px;
+            text-decoration: none;
+            font-size: 1.2em;
+            transition: color 0.3s ease;
+        }
+
+        .review-item a:hover {
+            color: #2980b9;
+        }
+
+        .review-item i {
+            margin-right: 5px;
+        }
+
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .pagination a {
+            color: #3498db;
+            margin: 0 10px;
+            font-size: 1.2em;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .pagination a:hover {
+            color: #2980b9;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 30px;
+            text-align: center;
+            font-size: 1.2em;
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            color: #2980b9;
+        }   
+    </style>
+
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>{{ product.product_name }}</h1>
+        </header>
+
+        <div class="product-detail">
+            <div class="product-images">
+                {% for image in product.images.all %}
+                <img src="{{ image.image.url }}" alt="{{ product.product_name }}" class="thumbnail"
+                    onclick="changeImage('{{ image.image.url }}')">
+                {% endfor %}
+            </div>
+
+            <div class="product-images-container">
+                <img id="main-image" src="{{ product.images.all.0.image.url }}" alt="{{ product.product_name }}"
+                    class="main-image">
+            </div>
+
+            <div class="product-info-container">
+                <div class="product-specs">
+                    <p><strong>Name:</strong> {{ product.product_name }}</p>
+                    <p><strong>Price:</strong> {{ product.product_price }}</p>
+                    <p><strong>Color:</strong> {{ product.color }}</p>
+                    <p><strong>Material:</strong> {{ product.material }}</p>
+                    <p><strong>Stock:</strong> {{ product.stock }}</p>
+                    <p><strong>Details:</strong> {{ product.product_description }}</p>
+                </div>
+
+                <div class="product-actions">
+                    {% if product.stock > 0 %}
+                    {% if user.is_authenticated and not user.profile.is_vendor %}
+                    {% if is_in_cart %}
+                    <a href="/cart/" class="add-to-cart-button">View Cart</a>
+                    {% else %}
+                    <form method="POST" action="/add_to_cart/{{ product.id }}/">
+                        {% csrf_token %}
+                        <label for="quantity">Quantity:</label>
+                        <input type="number" name="quantity" id="quantity" min="1" max="{{ product.stock }}" value="1"
+                            required>
+                        <button type="submit" class="add-to-cart-button">Add to Cart</button>
+                    </form>
+                    <a href="/buy-now/{{ product.id }}" class="buy-now-button">Buy Now</a>
+                    {% endif %}
+                    {% endif %}
+                    {% else %}
+                    <p class="stock">Product is out of stock</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="reviews-section">
+            <h2>Reviews</h2>
+            <div class="product-rating">
+                <p><strong>Average Rating:</strong>
+                    <span class="average-rating">{{ average_rating }} / 5</span>
+                <div class="stars">
+                    {% for i in star_range %}
+                    {% if i <= average_rating %} <i class="fa fa-star"></i>
+                        {% else %}
+                        <i class="fa fa-star-o"></i>
+                        {% endif %}
+                        {% endfor %}
+                </div>
+                </p>
+            </div>
+
+            {% if reviews %}
+            <ul>
+                {% for review in page_obj %}
+                <li class="review-item">
+                    <p class="username">Username: {{ review.user.username }}</p>
+                    <p class="rating">Rating: {{ review.rating }} / 5</p>
+                    <p>Review: {{ review.review_text }}</p>
+
+                    {% if user == review.user %}
+                    <a href="/product/{{ product.id }}/edit_review/{{ review.id }}">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+                    <a href="/product/{{ product.id }}/review/{{ review.id }}/delete/">
+                        <i class="fa-solid fa-trash"></i>
+                    </a>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p>No reviews available</p>
+            {% endif %}
+            <a href="/product/{{ product.id }}/add_review">Add review</a>
+        </div>
+
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page=1">&laquo; First</a>
+            <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            {% endif %}
+
+            <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">Next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+            {% endif %}
+        </div>
+
+        <a href="/" class="back-link">Homepage</a>
+    </div>
+
+</body>
+
+</html>
