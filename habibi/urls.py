@@ -26,6 +26,8 @@ from django.urls import path
 from django.urls import path
 
 from app.views import ProductSearchAPIView
+from app.views import CreateUserView
+
 
 
 
@@ -55,7 +57,7 @@ urlpatterns = [
 
     path('api/search/', ProductSearchAPIView.as_view(), name='product_search'),
 
-
+    path('users/', CreateUserView.as_view(), name='create_user'),
 
 
     path('create/', Create_category, name='Create_category'),

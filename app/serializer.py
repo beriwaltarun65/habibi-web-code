@@ -9,7 +9,14 @@ from .models import Product, SubCategory
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username','first_name','last_name','email')
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password']
+        extra_kwargs = {'password': {'write_only': True}}
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['id', 'phone_no', 'is_vendor']
+
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -71,5 +78,6 @@ class  ProductBySubCategoryIdserializer(serializers.ModelSerializer):
         model = Product
         fields = '__all__'
         read_only_fields = ('product_name','product_price','product_description')
+
 
 
