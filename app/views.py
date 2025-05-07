@@ -17,10 +17,43 @@ from .serializer import UserSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from .models import Product
-from .serializer import ProductSerializer
+from .serializer import ProductSerializer,UserSerializer,ProfileSerializer
 from rest_framework import generics,filters
 # import django_filters
 # from django_filters.filters import *
+from rest_framework.views import APIView
+
+
+
+
+class CreateUserView(APIView):
+    def post(self, request):
+        user_serializer = UserSerializer(data=request.data)
+        profile_serializer = ProfileSerializer(data=request.data)
+
+        if user_serializer.is_valid() and profile_serializer.is_valid():
+            user = User.objects.create_user(
+                username=user_serializer.validated_data['username'],
+                email=user_serializer.validated_data['email'],
+                password=user_serializer.validated_data['password']
+            )
+            user.first_name = user_serializer.validated_data['first_name']
+            user.last_name = user_serializer.validated_data['last_name']
+            user.save()
+
+            profile = Profile.objects.create(
+                phone_no=profile_serializer.validated_data['phone_no'],
+                is_vendor=profile_serializer.validated_data['is_vendor'],
+                user=user
+            )
+
+            return Response(user_serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(user_serializer.errors or profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
 
 
 class ProductSearchAPIView(generics.ListAPIView):
