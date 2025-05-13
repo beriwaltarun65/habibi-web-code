@@ -49,7 +49,6 @@ class ProductSearchAPIView(generics.ListAPIView):
 
 
 
-
 class SubCategoryByCategoryIdViewSet(ModelViewSet):
     queryset = SubCategory.objects.all()
     serializer_class = SubCategoryByCategoryIdserializer
@@ -60,7 +59,6 @@ class SubCategoryByCategoryIdViewSet(ModelViewSet):
 
         return Response(SubCategoryByCategoryIdserializer(subcategory,many=True).data,status=status.HTTP_200_OK) 
     
-
 
     
 
