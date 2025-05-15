@@ -26,13 +26,16 @@ from django.urls import path
 from django.urls import path
 
 from app.views import ProductSearchAPIView
-
-
-
-
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 router = routers.DefaultRouter()
- 
+
+
+
+
 # define the router path and viewset to be used
 
 router.register(r'user', UserViewset)
@@ -55,6 +58,11 @@ urlpatterns = [
 
 
     path('api/search/', ProductSearchAPIView.as_view(), name='product_search'),
+
+
+
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
 
     path('create/', Create_category, name='Create_category'),

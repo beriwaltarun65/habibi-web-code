@@ -1,0 +1,8 @@
+id,name,image,user_id
+1,ADDIDAS1,,1
+2,GUCCI,category_images/gucci_PNG8.png,1
+3,NIKE,category_images/nike-logo-bc2ioqg1qsuqoj35.jpg,1
+4,BATA,category_images/images.png,1
+5,PUMA,category_images/puma.png,1
+6,CAMPUS,category_images/campus.png,1
+

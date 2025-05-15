@@ -82,6 +82,24 @@ class CategoryViewset(ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
+    def create(self, request, *args, **kwargs):
+
+        name = request.data.get('name')
+
+        category = Category.objects.create(
+
+            name = name,
+
+            user_id = request.user.id
+
+        )
+
+
+
+        cat_ser = CategorySerializer(category)
+
+        return Response(cat_ser.data,status=status.HTTP_201_CREATED)
+
     
 
 class SubCategoryViewset(ModelViewSet):
