@@ -72,6 +72,7 @@ urlpatterns = [
     path('sub_category/<int:id>/', sub_category, name="sub_category"), 
     path('create_subcategory/<int:id>/', create_subcategory, name="create_subcategory"), 
     path('edit_sub_cat/<int:subcategory_id>/', edit_sub_cat, name="edit_sub_category"), 
+    path('delete_sub_cat/<int:subcategory_id>/',delete_sub_category,name="delete_sub_category"),
     
    
 

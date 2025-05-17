@@ -93,9 +93,6 @@ class CategoryViewset(ModelViewSet):
             user_id = request.user.id
 
         )
-
-
-
         cat_ser = CategorySerializer(category)
 
         return Response(cat_ser.data,status=status.HTTP_201_CREATED)
@@ -105,6 +102,19 @@ class CategoryViewset(ModelViewSet):
 class SubCategoryViewset(ModelViewSet):
     queryset = SubCategory.objects.all()
     serializer_class = SubCategorySerializer
+
+    def create(self, request, *args, **kwargs):
+        category_id = request.data.get('category')
+        category = Category.objects.get(id=category_id)
+        subcategory = SubCategory.objects.create(
+            name=request.data.get('name'),
+            category=category,
+            user=request.user
+        )
+        serializer = self.get_serializer(subcategory)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
 
 class ProductImageViewset(ModelViewSet):
     queryset = ProductImage.objects.all()
@@ -393,6 +403,15 @@ def edit_sub_cat(request, subcategory_id):
         'subcategory': subcategory,
         'categories': categories
     })
+
+def delete_sub_category(request,subcategory_id):
+    sub_category = SubCategory.objects.get(id=subcategory_id)
+    
+    if request.method == 'POST':
+        sub_category.delete()
+
+        return HttpResponseRedirect("/")
+    return render(request,'delete_sub_cat.html',{"sub_category":sub_category})
 
 
 def create_product(request, subcategory_id):
