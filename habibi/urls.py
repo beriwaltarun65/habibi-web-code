@@ -26,6 +26,8 @@ from django.urls import path
 from django.urls import path
 
 from app.views import ProductSearchAPIView
+
+
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -43,7 +45,9 @@ router.register(r'category', CategoryViewset)
 router.register(r'subcategory', SubCategoryViewset)
 router.register(r'products', ProductViewset)
 router.register(r'product-images', ProductImageViewset)
-router.register(r'order',OrderViewSet)
+router.register(r'order',OrderViewset)
+router.register(r'cart', cartViewset)
+router.register(r'review', ReviewViewset)
 router.register(r'subcategory_by_category',SubCategoryByCategoryIdViewSet,basename='subcategory_by_category_id')
 router.register(r'product_by_subcategory',ProductBySubCategoryIdViewset,basename='product_by_subcategory_id')
 
@@ -87,6 +91,7 @@ urlpatterns = [
     path('add_to_cart/<int:product_id>/', add_to_cart, name='add_to_cart'),
     path('cart/', view_cart, name='cart'),
     path('remove_from_cart/<int:product_id>/', remove_from_cart, name='remove_from_cart'),
+
 
 
     path('order/', proceed_order, name="proceed_order"),

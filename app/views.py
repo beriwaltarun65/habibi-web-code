@@ -49,6 +49,7 @@ class ProductSearchAPIView(generics.ListAPIView):
 
 
 
+
 class SubCategoryByCategoryIdViewSet(ModelViewSet):
     queryset = SubCategory.objects.all()
     serializer_class = SubCategoryByCategoryIdserializer
@@ -151,40 +152,90 @@ class ProductViewset(ModelViewSet):
 
 
 
-class OrderViewSet(ModelViewSet):
+
+class OrderViewset(ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
 
     def create(self, request, *args, **kwargs):
+        
+        user = request.user
+
         product_id = request.data.get('product')
-        p = Product.objects.get(id = product_id)
         quantity = request.data.get('quantity')
 
-        p.stock-= 1
-        p.save()
-        
-        s_address = request.data.get('shipping_address')
+        shipping_address = request.data.get('shipping_address')
         payment_method = request.data.get('payment_method')
+        delivery_date = request.data.get('delivery_date')
 
+        if not shipping_address or not payment_method:
+            return Response({'shipping_address and payment_method are required.'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
-        price = p.product_price
-        delivery_date = "2025-04-29"
-        user = 1
+        if product_id:
+           
+            try:
+                product = Product.objects.get(id=product_id)
+            except Product.DoesNotExist:
+                return Response({'Product not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        order = Order.objects.create(
-            price = price,
-            quantity = quantity,
-            delivery_date = delivery_date,
-            status = "In process",
-            shipping_address = s_address,
-            payment_method = payment_method,
-            user_id = user,
-            product_id = product_id
-        )
+            quantity = int(quantity or 1)
 
-        order.save()
-        return Response(OrderSerializer(order).data,status=status.HTTP_201_CREATED)
+            if product.stock < quantity:
+                return Response({f'Not enough stock for {product.product_name}'},
+                                status=status.HTTP_400_BAD_REQUEST)
 
+            product.stock -= quantity
+            product.save()
+
+            order = Order.objects.create(
+                user=user,
+                product=product,
+                price=product.product_price,
+                quantity=quantity,
+                shipping_address=shipping_address,
+                payment_method=payment_method,
+                delivery_date=delivery_date,
+                status='confirmed'
+            )
+
+            serializer = OrderSerializer(order)
+            return Response([serializer.data], status=status.HTTP_201_CREATED)
+
+        else:
+        
+            cart_items = AddToCart.objects.filter(user=user)
+            if not cart_items.exists():
+                return Response({'Cart is empty.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            created_orders = []
+            for item in cart_items:
+                product = item.product
+                item_quantity = item.quantity
+
+                if product.stock < item_quantity:
+                    return Response({f'Not enough stock for {product.product_name}'},
+                                    status=status.HTTP_400_BAD_REQUEST)
+
+                product.stock -= item_quantity
+                product.save()
+
+                order = Order.objects.create(
+                    user=user,
+                    product=product,
+                    price=product.product_price,
+                    quantity=item_quantity,
+                    shipping_address=shipping_address,
+                    payment_method=payment_method,
+                    delivery_date=delivery_date,
+                    status='confirmed'
+                )
+
+                created_orders.append(order)
+
+            cart_items.delete()
+            serializer = OrderSerializer(created_orders, many=True)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class ReviewViewset(ModelViewSet):
     queryset = Review.objects.all()
@@ -200,7 +251,7 @@ class ReviewViewset(ModelViewSet):
 
         review = Review.objects.create(
             product_id = product_id,
-            user_id = 1,
+            user_id = request.user.id,
             review_text = review_text,
             rating = rating
         )
@@ -216,6 +267,25 @@ class ReviewViewset(ModelViewSet):
         rvs = ReviewSerializer(reviews,many=True)
         return Response(rvs.data,status=status.HTTP_200_OK)
 
+class cartViewset(ModelViewSet):
+    queryset = AddToCart.objects.all()
+    serializer_class = cartSerializer
+
+    def create(self, request, *args, **kwargs):
+        product_id = request.data['product_id']
+        user_id = request.user.id
+        quantity = request.data['quantity']
+
+        cart_item = AddToCart.objects.create(
+            product_id=product_id,
+            user_id=user_id,
+            quantity=quantity
+        )
+
+        cart_item.save()
+
+        s = cartSerializer(cart_item)
+        return Response(s.data,status=status.HTTP_201_CREATED)
 
 
 

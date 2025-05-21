@@ -45,6 +45,10 @@ INSTALLED_APPS = [
     'app'
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # React app
+]
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

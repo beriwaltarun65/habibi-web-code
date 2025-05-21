@@ -79,5 +79,11 @@ class  ProductBySubCategoryIdserializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('product_name','product_price','product_description')
 
+class cartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AddToCart
+        fields = '__all__'
+        read_only_fields = ('user','product','quantity','price','booking_date','delivery_date','status','shipping_address','payment_method')
+
 
 
