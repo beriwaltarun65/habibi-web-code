@@ -19,9 +19,26 @@ from rest_framework.response import Response
 from .models import Product
 from .serializer import ProductSerializer,UserSerializer,ProfileSerializer
 from rest_framework import generics,filters
+from rest_framework import permissions
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 # import django_filters
 # from django_filters.filters import *
 from rest_framework.views import APIView
+
+
+
+class ProductBySubcategoryViewset(ModelViewSet):
+    queryset=Product.objects.all()
+    serializer_class=ProductBysubcategory
+
+    def retrieve(self, request, *args, **kwargs):
+        _id = kwargs['pk']
+        product=Product.objects.filter(subcategory = _id)
+        serializers = ProductBysubcategory(product, many=True, context={'request': request})
+        # serializers=ProductBysubcategory(product,many=True,)
+        return Response(serializers.data,status=status.HTTP_200_OK)
+    
 
 class ProductSearchAPIView(generics.ListAPIView):
     queryset = Product.objects.all()
@@ -60,44 +77,105 @@ class SubCategoryByCategoryIdViewSet(ModelViewSet):
 
         return Response(SubCategoryByCategoryIdserializer(subcategory,many=True).data,status=status.HTTP_200_OK) 
     
-
-    
-
-class ProductBySubCategoryIdViewset(ModelViewSet):
-    queryset = Product.objects.all()
-    serializer_class = ProductBySubCategoryIdserializer
+class SubCategoryByCategoryViewset(ModelViewSet):
+    queryset = SubCategory.objects.all()
+    serializer_class = SubCategoryByCategoryIdserializer        
 
     def retrieve(self, request, *args, **kwargs):
-        subcategory_id = kwargs['pk']
-        product = Product.objects.filter(subcategory_id = subcategory_id),
+        _id = kwargs['pk']
+        sub = SubCategory.objects.filter(category = _id)
+        serializer=SubCategoryByCategoryIdserializer(sub,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+    
 
-        return Response(ProductBySubCategoryIdserializer(product,many=True).data,status=status.HTTP_200_OK)
-
+    
+   
 
 
 class UserViewset(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer  
+    permission_classes = (permissions.AllowAny,)
+    
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        username = data['username']
+        first_name = data['first_name']
+        last_name = data['last_name']
+        email = data['email']
+        password = data['password']
+        phone_no = data['profile']['phone_no']
+        is_vendor = data['profile'].get('is_vendor', False)
+        
+        if User.objects.filter(username=username).exists():
+           return Response({'error':'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = User.objects.create_user(
+            username = username,
+            first_name = first_name,
+            last_name = last_name,
+            email = email,
+            password = password
+        )   
+
+        Profile.objects.create(
+            user = user,
+            phone_no = phone_no,
+            is_vendor = is_vendor
+        )
+
+        serializer = self.get_serializer(user, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def current_user(request):
+    user = request.user
+    try:
+        profile = user.profile  
+        return Response({
+            "username": user.username,
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "phone_no": profile.phone_no,
+            "is_vendor": profile.is_vendor
+        })
+    except Profile.DoesNotExist:
+        return Response({
+            "username": user.username,
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "phone_no" :"",
+            "is_vendor": False 
+        })
+
 
 class CategoryViewset(ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+   
+    
+    # permission_classes = [IsVendor]
 
     def create(self, request, *args, **kwargs):
-
+        # breakpoint()
+        image = request.FILES.get('image')
         name = request.data.get('name')
-
+        user_id = request.user.id
         category = Category.objects.create(
-
             name = name,
-
-            user_id = request.user.id
-
+            image = image,
+            user_id = user_id
         )
-        cat_ser = CategorySerializer(category)
 
-        return Response(cat_ser.data,status=status.HTTP_201_CREATED)
+        category.save()
+        category_serialzier = CategorySerializer(category)
 
+        return Response(category_serialzier.data, status=status.HTTP_201_CREATED)
     
 
 class SubCategoryViewset(ModelViewSet):
@@ -123,32 +201,42 @@ class ProductImageViewset(ModelViewSet):
 
 
 
+
 class ProductViewset(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-
 
     def create(self, request, *args, **kwargs):
         data = request.data
         images = request.FILES.getlist('images')
 
+        subcategory_id = data.get('subcategory')
+
+        if not subcategory_id:
+            return Response({'error': 'Subcategory ID is required.'}, status=400)
+
+        try:
+            subcategory = SubCategory.objects.get(id=subcategory_id)
+        except SubCategory.DoesNotExist:
+            return Response({'error': 'Invalid subcategory ID.'}, status=400)
+
         product = Product.objects.create(
-            product_name = data['product_name'],
-            product_price = data['product_price'],
-            product_description = data['product_description'],
-            color = data['color'],
-            material = data['material'],
-            stock = data['stock'],
-            category_id=data['category'],
-            subcategory_id=data['subcategory']
-        )        
-        upload_image =[ ]
+            product_name=data.get('product_name'),
+            product_price=data.get('product_price'),
+            product_description=data.get('product_description'),
+            color=data.get('color'),
+            material=data.get('material'),
+            stock=data.get('stock'),
+            subcategory=subcategory,
+            category=subcategory.category, 
+            user=request.user
+        )
+
         for image in images:
-            product_image = product.images.create(image=image)
-            upload_image.append(product_image)
-       
-        product_serializer = ProductSerializer(product)
-        return Response(product_serializer.data, status=status.HTTP_201_CREATED)
+            ProductImage.objects.create(product=product, image=image)
+
+        product_serializer = ProductSerializer(product, context={'request': request})
+        return Response(product_serializer.data, status=201)
 
 
 
@@ -267,25 +355,36 @@ class ReviewViewset(ModelViewSet):
         rvs = ReviewSerializer(reviews,many=True)
         return Response(rvs.data,status=status.HTTP_200_OK)
 
-class cartViewset(ModelViewSet):
+class AddToCartViewSet(ModelViewSet):
     queryset = AddToCart.objects.all()
-    serializer_class = cartSerializer
+    serializer_class = AddToCartSerializer
+
+    def get_queryset(self):
+        return AddToCart.objects.filter(user=self.request.user)
+
 
     def create(self, request, *args, **kwargs):
-        product_id = request.data['product_id']
-        user_id = request.user.id
-        quantity = request.data['quantity']
+        data = request.data
+        product_id = data.get('product')
+        quantity = data.get('quantity', 1)
+        user = request.user
 
-        cart_item = AddToCart.objects.create(
-            product_id=product_id,
-            user_id=user_id,
-            quantity=quantity
+        if AddToCart.objects.filter(product_id=product_id, user= user).exists():
+           return Response({"Product already in cart."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        product = Product.objects.get(id=product_id)
+        # serializer = self.get_serializer(data=request.data)
+        # serializer.is_valid(raise_exception=True)
+        # serializer.save(user=user)
+        cart_items = AddToCart.objects.create(
+            product = product,
+            quantity = quantity,
+            user = user
         )
+        cart_items.save()
 
-        cart_item.save()
-
-        s = cartSerializer(cart_item)
-        return Response(s.data,status=status.HTTP_201_CREATED)
+        serializer = self.get_serializer(cart_items)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 
@@ -821,38 +920,6 @@ def mark_as_delivered(request, order_id):
 
 
 
-def createuser(request):
-    if request.method == "POST":
-        username = request.POST['username']
-        first_name = request.POST['first_name']
-        last_name = request.POST['last_name']
-        password = request.POST["password"]
-        email = request.POST["email"]
-        phone_no = request.POST["phone_no"]
-        is_vendor = request.POST["is_vendor"]
-
-        if User.objects.filter(username=username).exists():
-            return HttpResponse("User already exists.")
-    
-        user = User.objects.create(
-            username=username,
-            first_name=first_name,
-            last_name=last_name,
-            email=email,
-        )
-        user.set_password(password)
-        user.save()
-
-        profile_instance = Profile.objects.create(  
-            phone_no=phone_no,
-            is_vendor=is_vendor,
-            user=user
-        )
-        profile_instance.save()
-
-        return redirect('homepage') 
-    
-    return render(request, "createuser.html")
 
 
 def delete_product(request,product_id):
@@ -927,18 +994,9 @@ def createuser(request):
     return render(request, "createuser.html")
 
 
-
-def get_profile(request):
-    if request.user.is_authenticated:
-        try:
-            profile_instance = request.user.profile
-            is_vendor = profile_instance.is_vendor
-        except Profile.DoesNotExist:
-            is_vendor = False
-
-        return render(request, "profile.html",{'user': request.user,'is_vendor':is_vendor})
-    else:
-        return redirect('userlogin')     
+class ProfileViewSet(ModelViewSet):
+    queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer    
     
 
 

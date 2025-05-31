@@ -40,16 +40,17 @@ router = routers.DefaultRouter()
 
 # define the router path and viewset to be used
 
-router.register(r'user', UserViewset)
+router.register(r'create_user', UserViewset)
 router.register(r'category', CategoryViewset)
 router.register(r'subcategory', SubCategoryViewset)
 router.register(r'products', ProductViewset)
 router.register(r'product-images', ProductImageViewset)
 router.register(r'order',OrderViewset)
-router.register(r'cart', cartViewset)
+router.register(r'cart', AddToCartViewSet)
+router.register(r'profile', ProfileViewSet)
 router.register(r'review', ReviewViewset)
 router.register(r'subcategory_by_category',SubCategoryByCategoryIdViewSet,basename='subcategory_by_category_id')
-router.register(r'product_by_subcategory',ProductBySubCategoryIdViewset,basename='product_by_subcategory_id')
+router.register('product_by_subcategory', ProductBySubcategoryViewset, basename='product_by_subcategory')
 
 
 # router.register(r'cart', AddToCartViewSet)    
@@ -64,9 +65,9 @@ urlpatterns = [
     path('api/search/', ProductSearchAPIView.as_view(), name='product_search'),
 
 
-
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/user/', current_user,name='currentuser'),
 
 
     path('create/', Create_category, name='Create_category'),
@@ -113,7 +114,7 @@ urlpatterns = [
     path('create_user/', createuser, name='create_user'),
     path('login/', userlogin, name="userlogin"),
     path('logout/', userlogout, name="userlogout"),
-    path('profile/', get_profile, name='get_profile'),
+
 
 
     

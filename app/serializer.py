@@ -3,26 +3,39 @@ from app.models import *
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from .models import Product, SubCategory
+from .models import Product, ProductImage
 
 
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password']
-        extra_kwargs = {'password': {'write_only': True}}
 
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ['id', 'phone_no', 'is_vendor']
+        fields = ['id', 'user', 'is_vendor', 'phone_no']        
+   
+class UserSerializer(serializers.ModelSerializer):
+    phone_number = serializers.CharField(source="profile.phone_no", required=False)
+    is_vendor = serializers.BooleanField(source="profile.is_vendor", required=False)
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password', 'phonen_umber', 'is_vendor']
+
+
+class UserSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializer()
+    class Meta:
+        model = User
+        # fields = '__all__'
+        fields = ('username','first_name','last_name','password','email','profile')
+        read_only_fields = ('id', 'username', 'email') 
 
 
 
-class CategorySerializer(serializers.ModelSerializer):
+class CategorySerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ('id', 'name', 'image')
+        read_only = ('user',)
 
 
 
@@ -30,22 +43,13 @@ class CategorySerializer(serializers.ModelSerializer):
 class SubCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SubCategory
-        fields = ['id', 'name']
-
-class ProductSerializer(serializers.ModelSerializer):
-    subcategory = SubCategorySerializer()
-
-    class Meta:
-        model = Product
-        fields = ['id', 'product_name','product_price', 'subcategory','color','product_description']
+        fields = ['id', 'name','user']
 
 
 
 
-class ProductImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductImage
-        fields = ('id','product','image')
+
+
 
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
@@ -73,17 +77,34 @@ class  SubCategoryByCategoryIdserializer(serializers.ModelSerializer):
         read_only_fields = ('user','name','image')
 
 
-class  ProductBySubCategoryIdserializer(serializers.ModelSerializer):
+
+
+
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    # product = ProductSerializer(read_only=True)
+    class Meta:
+        model = ProductImage
+        # fields = ('id', 'product', 'image')
+        fields = "__all__"
+
+class ProductBysubcategory(serializers.ModelSerializer):
+    images=ProductImageSerializer(many=True,read_only=True)
+    class Meta:
+        model=Product
+        fields = '__all__'
+
+class ProductSerializer(serializers.ModelSerializer):
+    images = ProductImageSerializer(many=True, read_only=True)
     class Meta:
         model = Product
-        fields = '__all__'
-        read_only_fields = ('product_name','product_price','product_description')
+        fields = '__all__' 
 
-class cartSerializer(serializers.ModelSerializer):
+class AddToCartSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+    product = ProductSerializer(read_only=True)
     class Meta:
         model = AddToCart
-        fields = '__all__'
-        read_only_fields = ('user','product','quantity','price','booking_date','delivery_date','status','shipping_address','payment_method')
-
+        fields = ['id','user', 'product', 'quantity', 'added_at']
 
 
