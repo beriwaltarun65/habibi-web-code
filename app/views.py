@@ -43,25 +43,36 @@ class ProductBySubcategoryViewset(ModelViewSet):
 class ProductSearchAPIView(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    """ This also the way of filtering """
-    # search_fields = ['color','product_name','product_description']
-    # filter_backends = (filters.SearchFilter,)
+
     
 
-    """ This is the another way of filtering """
     def get_queryset(self):
         queryset = super().get_queryset()
         query = self.request.query_params.get('search')
-        pr = self.request.query_params.get('price_gt')
+      
         if query:
             return queryset.filter(
                 Q(product_name__icontains=query) |
                 Q(product_description__icontains=query)|
                 Q(color__icontains=query)
-                # Q(product_price__gt=pr) 
+
             )
         return queryset
 
+# class ProductSearchAPIView(generics.ListAPIView):
+#     queryset = Product.objects.all()
+#     serializer_class = ProductSerializer
+
+#     def get_queryset(self):
+#         queryset = super().get_queryset()
+#         query = self.request.query_params.get('search')
+#         if query:
+#             return queryset.filter(
+#                 Q(product_name__icontains=query) |
+#                 Q(product_description__icontains=query) |
+#                 Q(color__icontains=query)
+#             )
+#         return queryset
 
 
 
